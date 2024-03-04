@@ -20,6 +20,10 @@ import org.jfree.fx.ResizableCanvas;
 
 public class MovingCharacter extends Application {
     private ResizableCanvas canvas;
+    private int imageIndex = 0;
+    private double x;
+    private int y;
+    private boolean jump = false;
 
     @Override
     public void start(Stage stage) throws Exception
@@ -55,15 +59,52 @@ public class MovingCharacter extends Application {
         graphics.setTransform(new AffineTransform());
         graphics.setBackground(Color.white);
         graphics.clearRect(0, 0, (int) canvas.getWidth(), (int) canvas.getHeight());
+        graphics.drawImage(tiles[imageIndex],(int)x,y,null);
     }
 
+    private BufferedImage[] tiles;
+    public MovingCharacter() {
+        try {
+            BufferedImage image = ImageIO.read(getClass().getResource("/images/sprite.png"));
+            tiles = new BufferedImage[65];
+            for(int i = 0; i < 65; i++) {
+                tiles[i] = image.getSubimage(64 * (i % 8), 64 * (i / 8), 64, 64);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-    public void update(double deltaTime)
-    {
+    }
+    private double timeLastUpdate = 0;
+    private double frameUpdate = 0.1;
+    public void update(double deltaTime) {
+        //met behulp van AI, want ik zat wel goed, alleen kwam er niet helemaal uit hoe ik ervoor zorgde dat die niet te snel ging updaten.
+        canvas.setOnMouseClicked(event -> {
+            jump = true;
+        });
+        y = 100;
+        timeLastUpdate += deltaTime;
+        if (timeLastUpdate >= frameUpdate && !jump){
+            timeLastUpdate -= frameUpdate;
+            if (x < canvas.getWidth() && !jump){
+                imageIndex = 31 + (imageIndex) % 10;
+                if (imageIndex == 40) {
+                    imageIndex = 32;
+                }
+            } else if (x > canvas.getWidth()) {
+                x = 0;
+            }
+        }else if (timeLastUpdate >= frameUpdate){
+            timeLastUpdate -= frameUpdate;
+            imageIndex = 40 + (imageIndex + 1) % 10;
+            if (imageIndex == 46){
+                jump = false;
+            }
+        }
+        x += 30 * deltaTime;
     }
 
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         launch(MovingCharacter.class);
     }
 

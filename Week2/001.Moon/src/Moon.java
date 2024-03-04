@@ -33,6 +33,11 @@ public class Moon extends Application {
         graphics.setTransform(new AffineTransform());
         graphics.setBackground(Color.white);
         graphics.clearRect(0, 0, (int) canvas.getWidth(), (int) canvas.getHeight());
+        Area moon = new Area(new Ellipse2D.Double(100,100,110,110));
+        Area c2 = new Area(new Ellipse2D.Double(125,100,110,110));
+        moon.subtract(c2);
+        graphics.fill(moon);
+        graphics.draw(moon);
     }
 
 

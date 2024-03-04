@@ -18,9 +18,9 @@ import org.jfree.fx.ResizableCanvas;
 public class VerletEngine extends Application {
 
     private ResizableCanvas canvas;
-    private ArrayList<Particle> particles = new ArrayList<>();
-    private ArrayList<Constraint> constraints = new ArrayList<>();
-    private PositionConstraint mouseConstraint = new PositionConstraint(null);
+    private final ArrayList<Particle> particles = new ArrayList<>();
+    private final ArrayList<Constraint> constraints = new ArrayList<>();
+    private final PositionConstraint mouseConstraint = new PositionConstraint(null);
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -96,13 +96,13 @@ public class VerletEngine extends Application {
         Particle nearest = getNearest(mousePosition);
         Particle newParticle = new Particle(mousePosition);
         particles.add(newParticle);
-        constraints.add(new DistanceConstraint(newParticle, nearest));
+
 
         if (e.getButton() == MouseButton.SECONDARY) {
             ArrayList<Particle> sorted = new ArrayList<>();
             sorted.addAll(particles);
 
-            //sorteer alle elementen op afstand tot de muiscursor. De toegevoegde particle staat op 0, de nearest op 1, en de derde op 2
+            //Sorteer alle elementen op afstand tot de muiscursor. De toegevoegde particle staat op 0, de nearest op 1, en de derde op 2
             Collections.sort(sorted, new Comparator<Particle>() {
                 @Override
                 public int compare(Particle o1, Particle o2) {
@@ -110,12 +110,32 @@ public class VerletEngine extends Application {
                 }
             });
 
-            constraints.add(new DistanceConstraint(newParticle, sorted.get(2)));
+
+            if(e.isControlDown()){
+                constraints.add(new DistanceConstraint(newParticle,sorted.get(2),100));
+                constraints.add(new DistanceConstraint(newParticle,nearest,100));
+            }
+            else if (e.isShiftDown()) {
+                constraints.add(new DistanceConstraint(sorted.get(1),sorted.get(2)));
+                particles.remove(newParticle);
+            }else {
+                constraints.add(new DistanceConstraint(newParticle, sorted.get(2)));
+            }
+
+
         } else if (e.getButton() == MouseButton.MIDDLE) {
             // Reset
             particles.clear();
             constraints.clear();
             init();
+        }
+        else if (e.getButton() == MouseButton.PRIMARY && e.isShiftDown()) {
+            constraints.add(new RopeConstraint(newParticle,nearest));
+        }
+        else if (e.getButton() == MouseButton.PRIMARY && e.isControlDown()){
+            constraints.add(new PositionConstraint(newParticle));
+        } else{
+            constraints.add(new DistanceConstraint(newParticle, nearest));
         }
     }
 
