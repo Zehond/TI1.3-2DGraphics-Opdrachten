@@ -16,7 +16,7 @@ import org.jfree.fx.FXGraphics2D;
 import org.jfree.fx.ResizableCanvas;
 
 public class VerletEngine extends Application {
-
+//todo opdracht nummer 5 en 6
     private ResizableCanvas canvas;
     private final ArrayList<Particle> particles = new ArrayList<>();
     private final ArrayList<Constraint> constraints = new ArrayList<>();
