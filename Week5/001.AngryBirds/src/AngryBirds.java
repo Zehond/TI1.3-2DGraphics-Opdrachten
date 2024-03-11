@@ -6,10 +6,14 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.dyn4j.collision.Fixture;
 import org.dyn4j.dynamics.Body;
@@ -33,6 +37,8 @@ public class AngryBirds extends Application {
     private Body bigBoiBird;
     private Body slingshotBody;
     private Body angryBlok;
+    private Point2D mouseTrigger;
+    private Area triggerArea;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -44,7 +50,14 @@ public class AngryBirds extends Application {
         showDebug.setOnAction(e -> {
             debugSelected = showDebug.isSelected();
         });
-        mainPane.setTop(showDebug);
+        Button reset = new Button("reset");
+        HBox hBox = new HBox();
+        hBox.getChildren().addAll(showDebug,reset);
+        mainPane.setTop(hBox);
+        reset.setOnAction(event -> {
+            init();
+        });
+
 
         canvas = new ResizableCanvas(g -> draw(g), mainPane);
         mainPane.setCenter(canvas);
@@ -71,8 +84,17 @@ public class AngryBirds extends Application {
         stage.setTitle("Angry Birds");
         stage.show();
         draw(g2d);
-    }
 
+        canvas.setOnMousePressed(event -> {
+            mousePosX = event.getX();
+            mousePosY = event.getY();
+            mouseTrigger = new Point2D.Double(mousePosX,mousePosY);
+            System.out.println(mouseTrigger);
+        });
+
+    }
+private double mousePosX;
+private double mousePosY;
     public void bigBoiBirdBody(){
         //bigRedbird body
         bigBoiBird = new Body();
@@ -82,24 +104,16 @@ public class AngryBirds extends Application {
         bigBoiBird.addFixture(bigBoiFixture);
         bigBoiBird.getTransform().setTranslation(new Vector2(-7,-2.5));
         bigBoiBird.getFixture(0).setFriction(3);
-        bigBoiBird.getFixture(0).setDensity(20);
-        bigBoiBird.setMass(MassType.NORMAL);
+        bigBoiBird.getFixture(0).setDensity(1);
+        bigBoiBird.setMass(MassType.INFINITE);
         world.addBody(bigBoiBird);
     }
 
-//    public void isMouseCLicked(MouseEvent mouseButton) {
-//        Point2D mouse = new Point2D.Double(mouseButton.getX(), mouseButton.getY());
-//        if (mouseButton.getButton() == MouseButton.PRIMARY){
-//            bigBoiBird.setMass(MassType.NORMAL);
-//            bigBoiBird.applyForce(new Vector2(-mouseButton.getX(),-mouseButton.getY()));
-//        }
-//    }
     public void init(){
         this.world = new World();
         world.setGravity(new Vector2(0,-9.81));
         Body background = new Body();
         gameObjects.add(new GameObject("Angry birds background by gsgill37-d3kogmx_jpg.jpg",background,new Vector2(0,0),2.4));
-
         setBorders();
         slingshotBody();
         bigBoiBirdBody();
@@ -116,6 +130,12 @@ public class AngryBirds extends Application {
         graphics.setTransform(new AffineTransform());
         graphics.setBackground(Color.white);
         graphics.clearRect(0, 0, (int) canvas.getWidth(), (int) canvas.getHeight());
+
+        graphics.setColor(Color.blue);
+        Shape red = new Rectangle2D.Double(150,770,10,10);//todo middle point slingshot
+        graphics.fill(red);
+
+        triggerArea = new Area(new Rectangle2D.Double(100,720,130,130));
 
         AffineTransform originalTransform = graphics.getTransform();
         graphics.setTransform(camera.getTransform((int) canvas.getWidth(), (int) canvas.getHeight()));
@@ -134,8 +154,8 @@ public class AngryBirds extends Application {
     }
 
     public void update(double deltaTime) {
-        mousePicker.update(world, camera.getTransform((int) canvas.getWidth(), (int) canvas.getHeight()), 100);
-//        canvas.setOnMouseDragged(this::isMouseCLicked);
+//        mousePicker.update(world, camera.getTransform((int) canvas.getWidth(), (int) canvas.getHeight()), 100);
+       canvas.setOnMouseReleased(this :: shootBirb);
         world.update(deltaTime);
     }
 
@@ -177,13 +197,9 @@ public class AngryBirds extends Application {
     public void slingshotBody(){
         slingshotBody = new Body();
         gameObjects.add(new GameObject("slingshot.png",slingshotBody,new Vector2(0,0),0.3));
-//        BodyFixture slingshotFixture = new BodyFixture(Geometry.createRectangle(0.5,0.5));
-//        slingshotFixture.setRestitution(0);
-//        slingshotBody.addFixture(slingshotFixture);
         slingshotBody.getTransform().setTranslation(new Vector2(-7,-3));
         slingshotBody.setMass(MassType.INFINITE);
         world.addBody(slingshotBody);
-
     }
 
     public void angryBlok(Vector2 placement){
@@ -198,9 +214,23 @@ public class AngryBirds extends Application {
         world.addBody(angryBlok);
     }
 
-    public void shootBirb(){
-        bigBoiBird.applyForce(new Vector2(20));
+
+    public void shootBirb(MouseEvent event){
+        double speed = 5;
+        if (isIntriggerArea()){
+            Vector2 force = new Vector2(mousePosX - event.getX(), event.getY() - mousePosY);
+            force.multiply(speed);
+            this.bigBoiBird.setMass(MassType.NORMAL);
+            this.bigBoiBird.applyForce(force);
+        }
     }
+
+    public boolean isIntriggerArea(){
+        if (triggerArea.contains(mouseTrigger)){
+            return true;
+        }else return false;
+    }
+
 
     public static void main(String[] args) {
         launch(AngryBirds.class);
