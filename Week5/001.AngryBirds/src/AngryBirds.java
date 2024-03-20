@@ -216,7 +216,7 @@ private double mousePosY;
 
 
     public void shootBirb(MouseEvent event){
-        double speed = 5;
+        double speed = 3;
         if (isIntriggerArea()){
             Vector2 force = new Vector2(mousePosX - event.getX(), event.getY() - mousePosY);
             force.multiply(speed);
