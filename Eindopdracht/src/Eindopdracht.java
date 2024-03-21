@@ -29,6 +29,8 @@ public class Eindopdracht extends Application {
     private   Rectangle2D rectangle2DBounds;
     private boolean inRectangle = false;
     private Point2D centerpoint;
+    private double zoomFactor;
+    private Point2D originalMouseCoords;
 
     //TODO zorg ervoor dat als je de text dragged en je hebt gescaled dat je dan ook de muis nog op de tekst blijft
     // want vanwege de scale neemt die m wel mee maar je muis is niet in de buurt van de text
@@ -45,13 +47,16 @@ public class Eindopdracht extends Application {
             if (event.getButton() == MouseButton.PRIMARY){
                 rectangle2DBounds = helloWorldPaint.getBounds2D();
                 if (inRectangle){
-                    x = event.getX() - offsetX;
-                    y = event.getY() - offsetY;
+                    double deltaX = (event.getX() - originalMouseCoords.getX()) / scaleX;
+                    double deltaY = (event.getY() - originalMouseCoords.getY()) / scaleY;
+                    x += deltaX;
+                    y += deltaY;
+                    originalMouseCoords = new Point2D.Double(event.getX(), event.getY());
                 }
             } else if (event.getButton() == MouseButton.SECONDARY) {
                 if (lastY > 0){
                     double deltaY = event.getSceneY() - lastY;
-                    double zoomFactor = 1 - deltaY * 0.01;
+                    zoomFactor = 1 - deltaY * 0.01;
 
                     scaleX = Math.max(0.1, Math.min(3.5, scaleX * zoomFactor));
                     scaleY = Math.max(0.1, Math.min(3.5, scaleY * zoomFactor));
@@ -64,8 +69,7 @@ public class Eindopdracht extends Application {
             rectangle2DBounds = helloWorldPaint.getBounds2D();
             if (rectangle2DBounds.contains(event.getX(),event.getY())){
                 inRectangle = true;
-                offsetX = event.getX() - x;
-                offsetY = event.getY() - y;
+                originalMouseCoords = new Point2D.Double(event.getX(), event.getY());
             }
             if (event.getButton() == MouseButton.PRIMARY && event.isControlDown()){
                 x = 200;
