@@ -1,6 +1,7 @@
 
 import java.awt.*;
 import java.awt.geom.*;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -8,9 +9,11 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import org.jfree.fx.FXGraphics2D;
 import org.jfree.fx.ResizableCanvas;
@@ -18,9 +21,10 @@ import org.jfree.fx.ResizableCanvas;
 public class VerletEngine extends Application {
 //todo opdracht nummer 5 en 6
     private ResizableCanvas canvas;
-    private final ArrayList<Particle> particles = new ArrayList<>();
-    private final ArrayList<Constraint> constraints = new ArrayList<>();
-    private final PositionConstraint mouseConstraint = new PositionConstraint(null);
+    private ArrayList<Particle> particles = new ArrayList<>();
+    private ArrayList<Constraint> constraints = new ArrayList<>();
+    private PositionConstraint mouseConstraint = new PositionConstraint(null);
+    private final String filename = "dateScene";
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -41,6 +45,34 @@ public class VerletEngine extends Application {
                 draw(g2d);
             }
         }.start();
+        Button saveScene = new Button("save scene");
+        saveScene.setOnAction(event -> {
+            try (FileOutputStream fileOutputStream = new FileOutputStream(filename);
+                 ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)){
+                objectOutputStream.writeObject(particles);
+                objectOutputStream.writeObject(constraints);
+                objectOutputStream.writeObject(mouseConstraint);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+        });
+        Button loadButton = new Button("load scene");
+        loadButton.setOnAction(event -> {
+            try (FileInputStream fileInputStream = new FileInputStream(filename);
+                 ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
+                particles = (ArrayList<Particle>) objectInputStream.readObject();
+                constraints = (ArrayList<Constraint>) objectInputStream.readObject();
+                mouseConstraint = (PositionConstraint) objectInputStream.readObject();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+        });
+
+        HBox Hbox = new HBox();
+        Hbox.getChildren().addAll(saveScene,loadButton);
+        mainPane.setTop(Hbox);
 
         // Mouse Events
         canvas.setOnMouseClicked(e -> mouseClicked(e));
