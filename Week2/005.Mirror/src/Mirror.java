@@ -34,7 +34,7 @@ public class Mirror extends Application {
         graphics.setBackground(Color.white);
         graphics.clearRect(0, 0, (int) canvas.getWidth(), (int) canvas.getHeight());
 
-        Area vierkant = new Area(new Rectangle2D.Double(0,250,100,100));
+        Area vierkant = new Area(new Rectangle2D.Double(-50,100,100,100));
         graphics.translate(canvas.getWidth()/2,canvas.getHeight()/2);
         graphics.scale(1,-1);
         graphics.setColor(Color.red);
