@@ -7,7 +7,6 @@ import java.awt.geom.Point2D;
 public class Renderable {
     private Shape shape;
     private Point2D position;
-    private float rotation;
     private float scale;
 
     public Renderable(Shape shape, Point2D position, float scale)
@@ -33,7 +32,6 @@ public class Renderable {
     public AffineTransform getTransform() {
         AffineTransform tx = new AffineTransform();
         tx.translate(position.getX(), position.getY());
-        tx.rotate(rotation);
         tx.scale(scale,scale);
         return tx;
     }

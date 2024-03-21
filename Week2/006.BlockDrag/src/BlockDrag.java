@@ -33,6 +33,7 @@ public class BlockDrag extends Application {
         canvas.setOnMousePressed(e -> mousePressed(e));
         canvas.setOnMouseReleased(e -> mouseReleased(e));
         canvas.setOnMouseDragged(e -> mouseDragged(e));
+        canvas.setOnMouseClicked(this::mouseClickedWithControl);
 
         draw(new FXGraphics2D(canvas.getGraphicsContext2D()));
     }
@@ -41,13 +42,19 @@ public class BlockDrag extends Application {
         renderables.add(new Renderable(new Rectangle2D.Double(-50,-50,100,100), new Point2D.Double(400,400),0.75f));
         renderables.add(new Renderable(new Rectangle2D.Double(-50,-50,100,100), new Point2D.Double(200,300),0.75f));
    }
+    private Color[] colors = {Color.BLACK,Color.blue,Color.cyan,Color.red,Color.orange,Color.pink};
     public void draw(FXGraphics2D graphics) {
         graphics.setTransform(new AffineTransform());
         graphics.setBackground(Color.white);
         graphics.clearRect(0, 0, (int) canvas.getWidth(), (int) canvas.getHeight());
-
+        int i = 0;
         for (Renderable renderable : renderables) {
+            i++;
+            graphics.setColor(colors[i]);
             renderable.draw(graphics);
+            if (i == 5){
+                i = 0;
+            }
         }
     }
 
@@ -61,6 +68,12 @@ public class BlockDrag extends Application {
             if (renderable.getTransformedShape().contains(e.getX(),e.getY()) && e.getButton() == MouseButton.PRIMARY){
                 selectedRenderable = renderable;
             }
+        }
+    }
+    private void mouseClickedWithControl(MouseEvent event){
+        if (event.getButton() == MouseButton.PRIMARY && event.isControlDown()){
+            renderables.add(new Renderable(new Rectangle2D.Double(-50,-50,100,100), new Point2D.Double(event.getX(),event.getY()),0.75f));
+            draw(new FXGraphics2D(canvas.getGraphicsContext2D()));
         }
     }
 
