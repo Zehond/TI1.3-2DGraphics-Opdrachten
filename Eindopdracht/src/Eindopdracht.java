@@ -124,7 +124,6 @@ public class Eindopdracht extends Application {
 
         graphics2D.fill(helloWorldPaint);
         graphics2D.setColor(Color.BLACK);
-
     }
     private void update(double delta) {
         hue += delta * 60;
